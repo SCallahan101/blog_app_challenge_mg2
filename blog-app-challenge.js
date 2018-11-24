@@ -19,8 +19,7 @@ app.use(morgan('common'));
 app.use(express.json());
 // does - dash cause an interference in coding? Check with Ali at 3pm today.
 app.get('/blogposts', (req, res) => {
-  Blog
-  .find()
+  Blog.find()
   .then(posts => {
     res.json({
       posts: posts.map(post => post.serialize())

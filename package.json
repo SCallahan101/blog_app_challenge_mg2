@@ -2,11 +2,11 @@
   "name": "mongoose_api_challenge",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "blog-app-challenge.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node your-script.js"
+    "start": "node blog-app-challenge.js"
   },
-  "author": "",
+  "author": "Shannon Callahan",
   "license": "ISC"
 }

@@ -33,4 +33,4 @@ blogpostSchema.methods.serialize = function() {
 
 const Blog = mongoose.model("blogpost", blogpostSchema);
 
-module.export = { Blog };
+module.exports = { Blog };

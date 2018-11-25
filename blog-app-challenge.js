@@ -21,8 +21,9 @@ app.use(express.json());
 app.get('/blogposts', (req, res) => {
   Blog.find()
   .then(posts => {
-    res.json(
-      posts.map(post => post.serialize()));
+    res.json({
+      posts: posts.map(post => post.serialize())
+    });
   })
   .catch(err => {
     console.error(err);

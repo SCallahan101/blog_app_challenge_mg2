@@ -10,6 +10,8 @@
   "author": "Shannon Callahan",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.16.4"
+    "express": "^4.16.4",
+    "mongoose": "^5.3.13",
+    "morgan": "^1.9.1"
   }
 }

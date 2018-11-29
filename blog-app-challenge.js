@@ -18,7 +18,7 @@ const app = express();
 app.use(morgan('common'));
 app.use(express.json());
 // does - dash cause an interference in coding? Check with Ali at 3pm today.
-app.get('/blogposts', (req, res) => {
+app.get('/blogposts1', (req, res) => {
   Blog.find()
   .then(posts => {
     res.json({
@@ -31,7 +31,7 @@ app.get('/blogposts', (req, res) => {
   });
 });
 
-app.get('/blogposts/:id', (req, res) => {
+app.get('/blogposts1/:id', (req, res) => {
   Blog
   .findbyId(req.params.id)
   .then(post => res.json(post.serialize()))
@@ -40,13 +40,25 @@ app.get('/blogposts/:id', (req, res) => {
     res.status(500).json({ message: "Internal service error"});
   });
 });
+app.get('/blogposts1/:id', (req, res) => {
+  Blog
+  .findOne({
+    title: 'some title'
+  })
+  .then(post => {
+    post.comments.push([{ 'content': 'Here is a first comment.'}, { 'content': 'Here is a second comment.'}, {'content': 'Here is a third comment.'}]);
+    post.save();
+  });
+});
 
-app.post('/blogposts', (req, res) => {
-  const requiredFields = ['title','author', 'content'];
+
+app.post('/blogposts1', (req, res) => {
+  const author_id = '_id';
+  const requiredFields = ['title', 'content', 'author_id'];
   for(let i = 0; i < requiredFields.length; i++) {
     const field = requiredFields[i];
     if(!(field in res.body)) {
-      const message = `Missing \`${field}\` in request body`;
+      const message = `Missing \`${field}\` in request body` + `Or something gone wrong with \`${requiredFields[2]}\` `;
       console.error(message);
       return res.status(400).send(message)
     }
@@ -65,7 +77,24 @@ app.post('/blogposts', (req, res) => {
   });
 });
 
-app.put('/blogposts/:id', (req, res) => {
+// Collection: authors
+
+app.post('/authors', (req, res) => {
+const requiredInfo = [ 'firstName', 'lastName', 'userName']
+for(let i = 0; i < requiredInfo.length; i++) {
+  const info = requiredInfo[i];
+  if(!(info in res.body)) {
+    const errorMessage = `Missing some author contents in \`${info}\` therefore you need to take a double look`;
+    console.log(errorMessage);
+    return res.status(400).send(errorMessage)
+  }
+}
+  Blog
+  return res.json({ "_id":, "name":, "username":});
+});
+
+
+app.put('/blogposts1/:id', (req, res) => {
   if(!(req.params.id && req.body.id && req.params.id === req.body.id)) {
     const message =
     `Request path id (${req.params.id}) and request body id` +
@@ -74,7 +103,7 @@ app.put('/blogposts/:id', (req, res) => {
     return res.status(400).json({ message: message });
   }
   const toUpdate = {};
-  const updateableFields = ["title", "author", "content"];
+  const updateableFields = ["title", "content"];
   updateableFields.forEach(field => {
     if(field in res.body) {
       toUpdate[field] = res.body[field];
@@ -84,10 +113,37 @@ app.put('/blogposts/:id', (req, res) => {
   .findByIdAndUpdate(req.params.id, {$set: toUpdate}, {new: true})
   .then(post => res.status(204).end())
   .catch(err => res.status(500).json({
-    message: 'Internal service error'}));
+    message: 'Internal service error'}))
+  .finally(endResult => res.status(200).json({
+    message: 'The updated title and content were successful'}));
 });
 
-app.delete('/blogposts/:id', (req, res) => {
+// Collection authors
+app.put("/authors/:id", (req, res) => {
+  if(!(req.params.id && req.body.id && req.params.id === req.body.id)) {
+    const message =
+    `Request path id (${req.params.id}) and request body id` +
+    `(${req.body.id}) must match`;
+    console.error(message);
+    return res.status(400).json({ message: message });
+  }
+  const updateName = {};
+  const changeAbleFields = ["firstName", "lastName", "userName"];
+  changeAbleFields.forEach(fieldName => {
+    if(fieldName in res.body) {
+      updateName[fieldName] = res.body[fieldName];
+    }
+  });
+  Blog
+  .findByIdAndUpdate(req.params.id, {$set: updateName}, {new: true})
+  .then(postName => res.status(204).end())
+  .catch(err => res.status(500).json({
+    message: 'Internal service error'}))
+  .finally(result => res.status(200).json({
+    message: ` \`${_id},${name},${userName}\` `}));
+});
+
+app.delete('/blogposts1/:id', (req, res) => {
   Blog
   .findByIdAndRemove(res.params.id)
   .then(() => {
@@ -101,6 +157,20 @@ app.delete('/blogposts/:id', (req, res) => {
   // .catch(err => res.status(500).json({
   //   message: 'Internal service error'
   // }));
+});
+
+// Collection authors
+app.delete('/authors/:id', (req, res) => {
+  Blog
+  .findByIdAndRemove(res.params.id)
+  .then(() => {
+    res.status(204).json({message: 'success'});
+  })
+  .catch(err => {
+    console.error(err);
+    res.status(500).json({message: 'Internal service error'});
+  });
+  .finally(res.status(204));
 });
 
 app.use("*", function(req, res) {
